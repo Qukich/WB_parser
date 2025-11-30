@@ -42,9 +42,7 @@ def send_get_req_catalog(query: str, page: int) -> requests.Response:
     return requests.get(SEARCH_URL, params=params, headers=HEADERS, cookies=cookies, timeout=10)
 
 
-def get_search_first_page(query: str) -> list[Any] | tuple[Any, Any]:
-    r = send_get_req_catalog(query, 1)
-    # если слишком часто дергали API — сервер может вернуть 429
+def get_products(r: requests.Response, query: str) -> List[Dict[str, Any]]:
     if r.status_code == 429:
         print("?? Wildberries вернул 429 Too Many Requests.")
         print(
@@ -61,22 +59,22 @@ def get_search_first_page(query: str) -> list[Any] | tuple[Any, Any]:
         r = send_get_req_catalog(query, 1)
         r.raise_for_status()
         data = r.json()
-        products = data.get("products", [])
-    return products, data.get("total")
+
+    return data
+
+
+def get_search_first_page(query: str) -> list[Any] | tuple[Any, Any]:
+    r = send_get_req_catalog(query, 1)
+    data = get_products(r, query)
+
+    return data.get("products", []), data.get("total")
 
 
 def get_search_page(query: str, page: int) -> list[Any]:
     r = send_get_req_catalog(query, page)
     # если слишком часто дергали API — сервер может вернуть 429
-    if r.status_code == 429:
-        print("?? Wildberries вернул 429 Too Many Requests.")
-        print(
-            " Это лимит на стороне сайта. Подождите 15–30 минут "
-            "и запустите скрипт снова."
-        )
-        return []
-    r.raise_for_status()
-    data = r.json()
+    data = get_products(r, query)
+
     return data.get("products", [])
 
 

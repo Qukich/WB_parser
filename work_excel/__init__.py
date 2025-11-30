@@ -32,7 +32,6 @@ def save_excels(rows: List[Dict[str, Any]],
             "\n? Данных нет. Либо WB ничего не вернул по запросу,"
             " либо сработало ограничение по частоте запросов."
         )
-        print("Файлы Excel не созданы.")
         return
     df_new = pd.DataFrame(rows)
     filtered_new = df_new[
