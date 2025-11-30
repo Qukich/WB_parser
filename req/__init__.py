@@ -55,13 +55,14 @@ def get_search_first_page(query: str) -> list[Any] | tuple[Any, Any]:
     r.raise_for_status()
     data = r.json()
     products = data.get("products", [])
-    if len(products) == 0:
+    if not products:
         print("Запрос не прошел, пробуем ещё раз через 15 секунд.")
         time.sleep(15)
         r = send_get_req_catalog(query, 1)
         r.raise_for_status()
         data = r.json()
-    return data.get("products", []), data.get("total")
+        products = data.get("products", [])
+    return products, data.get("total")
 
 
 def get_search_page(query: str, page: int) -> list[Any]:
